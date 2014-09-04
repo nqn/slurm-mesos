@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -32,4 +33,17 @@ std::string Config::expand(std::string templatePath) {
   ctemplate::ExpandTemplate(templatePath, ctemplate::DO_NOT_STRIP, &dict, &output);
   
   return output;
+}
+
+std::string Config::expandToTemporaryFile(std::string templatePath) {
+  // Write config to temporary file.
+  char* path = tmpnam(NULL);
+  if (!path) {
+    return "";
+  }
+  ofstream temporaryConfig(path);
+  temporaryConfig << expand(templatePath) << endl;
+  temporaryConfig.close();
+
+  return path;
 }

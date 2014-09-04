@@ -10,6 +10,8 @@ public:
 
   std::string expand(std::string templatePath);
 
+  std::string expandToTemporaryFile(std::string templatePath);
+
 private:
   std::string primaryControlDaemon_;
   std::vector<std::string> nodes_;

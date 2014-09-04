@@ -1,8 +1,12 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <iostream>
 
 #include <cluster.hpp>
+#include <network.hpp>
+
 #include <rapidjson/document.h>
 #include <curl/curl.h>
 
@@ -61,10 +65,13 @@ Cluster::Cluster(string masterUrl) {
       for (rapidjson::SizeType i = 0; i < slaves.Size(); i++) {
         const rapidjson::Value& slave = slaves[i];
 
-        std::string node(slave["hostname"].GetString());
-        nodes_.push_back(node);
+        string node(slave["hostname"].GetString());
+
+        // Resolve hostname in case of IP.
+        string nodeHostname = network::hostnameFromIP(node);
+
+        nodes_.push_back(nodeHostname);
       }
-  
     }
  
     curl_easy_cleanup(curl);
