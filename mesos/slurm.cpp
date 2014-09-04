@@ -13,6 +13,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
   const string slurmdPath = "/usr/local/sbin/slurmd";
+  const string statePath = "/master/state.json";
 
   if (argc < 2) {
     return EXIT_FAILURE;
@@ -20,26 +21,23 @@ int main(int argc, char** argv) {
 
   string master(argv[1]);
 
-  Cluster cluster("http://" + master + "/master/state.json");
+  Cluster cluster("http://" + master + statePath);
 
   nodeList nodes = cluster.nodes();
-  for (nodeList::iterator it = nodes.begin(); it != nodes.end(); it++) {
-    string& node = *it;
-    cout << node << endl;
-  }
-
   Config config("hostname", nodes);
 
-  string temporaryConfigPath = mktemp("");
-  ofstream temporaryConfig(temporaryConfigPath);
-
-  cout << config.expand("config.tpl") << endl;
-
+  // Write config to temporary file.
+  char* path = tmpnam(NULL);
+  if (!path) {
+    return EXIT_FAILURE;
+  }
+  ofstream temporaryConfig(path);
+  temporaryConfig << config.expand("config.tpl") << endl;
   temporaryConfig.close();
 
-  // TODO(nnielsen): Write new config.
+  cout << "Wrote config to " << path << endl;
 
-  // TODO(nnielsen): Start slurmctld
+  // Start slurmctld (backed by Mesos Scheduler).
 
   return EXIT_SUCCESS;
 }
